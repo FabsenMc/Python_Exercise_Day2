@@ -1,0 +1,40 @@
+import pandas as pd
+from sqlalchemy import create_engine
+
+url = "https://raw.githubusercontent.com/opencampus-sh/einfuehrung-in-data-science-und-ml/main/wetter.csv"
+data = pd.read_csv(url)
+
+#print(data)
+
+gdurchtemp = sum(data["Temperatur"])/len(data["Temperatur"])
+# print(gdurchtemp)
+
+data["Datum"] = pd.to_datetime(data["Datum"]) # convert Datum to datetime functionality
+
+condition = (data["Datum"].dt.month == 7) # Filter for July
+
+#july_temperatures = data.loc[condition, "Temperatur"]
+#july_durch_temperatures = sum(july_temperatures)/len(july_temperatures)
+#print(july_durch_temperatures)
+
+def durch_temp(messungen, monat):
+    condition = (data["Datum"].dt.month == monat) # Filter for Month
+    month_temp = messungen.loc[condition, "Temperatur"] # Return Temperatures for given month
+    dtemp = sum(month_temp)/len(month_temp) # calculate durchschnitt
+    print(dtemp)
+    return dtemp # return result instead of printing
+
+durchjuly = durch_temp(data, 7)
+durch_mai = durch_temp(data, 5)
+
+
+import scipy.stats as stats
+
+# Perform an independent T-test
+t_stat, p_value = stats.ttest_ind(data[data["Datum"].dt.month == 7]["Temperatur"], data[data["Datum"].dt.month == 5]["Temperatur"])
+
+# Interpret the result
+if p_value < 0.05:
+    print(f"Significant difference found (t-statistic = {t_stat}, p-value = {p_value}).")
+else:
+    print(f"No significant difference found (t-statistic = {t_stat}, p-value = {p_value}).")
